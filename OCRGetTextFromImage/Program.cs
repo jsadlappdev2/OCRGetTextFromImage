@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using OCRGetTextFromImage;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using static Newtonsoft.Json.JsonConvert;
+
 
 namespace CSHttpClientSample
 {
-    static class Program
+    public class Program
     {
         // **********************************************
         // *** Update or verify the following values. ***
@@ -30,14 +34,23 @@ namespace CSHttpClientSample
         {
             // Get the path and filename to process from the user.
             Console.WriteLine("Optical Character Recognition:");
-            Console.Write("Enter the path to an image with text you wish to read: ");
-            string imageFilePath = Console.ReadLine();
+            // Console.Write("Enter the path to an image with text you wish to read: ");
+            // string imageFilePath = Console.ReadLine();
+            string imageFilePath = "C:\\Jerry Shen\\images.jpg";
+            try
+            {
 
-            // Execute the REST API call.
-            MakeOCRRequest(imageFilePath);
+                // Execute the REST API call.
+                MakeOCRRequest(imageFilePath);
 
-            Console.WriteLine("\nPlease wait a moment for the results to appear. Then, press Enter to exit...\n");
-            Console.ReadLine();
+                Console.WriteLine("\nPlease wait a moment for the results to appear. Then, press Enter to exit...\n");
+                 Console.ReadLine();
+            }
+            catch (Exception ee)
+            {
+                Console.WriteLine("Error: " +ee.Message.ToString());
+
+            }
         }
 
 
@@ -66,7 +79,7 @@ namespace CSHttpClientSample
             using (ByteArrayContent content = new ByteArrayContent(byteData))
             {
                 // This example uses content type "application/octet-stream".
-                // The other content types you can use are "application/json" and "multipart/form-data".
+                // The other content types you can use are "application/json" and "multipart/form-data"//application/octet-stream
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
                 // Execute the REST API call.
@@ -77,7 +90,31 @@ namespace CSHttpClientSample
 
                 // Display the JSON response.
                 Console.WriteLine("\nResponse:\n");
-                Console.WriteLine(JsonPrettyPrint(contentString));
+                //  Console.WriteLine(JsonPrettyPrint(contentString));
+                File.WriteAllText(@"C:\\Jerry Shen\\ocrtest.json", JsonPrettyPrint(contentString));
+                var obj = DeserializeObject<RootObject>(JsonPrettyPrint(contentString));
+                Console.WriteLine(obj.language);
+                Console.WriteLine(obj.textAngle);
+                Console.WriteLine(obj.orientation);           
+
+                string final_test = "";
+
+                foreach (var region_objall in obj.regions)
+                {
+                    foreach (var lines_objall in region_objall.lines )
+                    {
+                        foreach(var words_objall in lines_objall.words)
+                        {
+
+                            final_test += words_objall.text + " ";
+                        }
+
+                    }
+                }              
+                Console.WriteLine(final_test);
+
+                File.WriteAllText(@"C:\\Jerry Shen\\OCRText.txt", JsonPrettyPrint(final_test));
+
             }
         }
 
@@ -161,5 +198,17 @@ namespace CSHttpClientSample
 
             return sb.ToString().Trim();
         }
+
+        RootObject OCRText;
+        public RootObject OCRTexts
+        {
+            get { return OCRText; }
+            // set { OCRTexts = value; OnPropertyChanged(); }
+        }
+
+        Region reion = null;
+
+
+
     }
 }
