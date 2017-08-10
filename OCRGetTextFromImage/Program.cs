@@ -36,7 +36,7 @@ namespace CSHttpClientSample
             Console.WriteLine("Optical Character Recognition:");
             // Console.Write("Enter the path to an image with text you wish to read: ");
             // string imageFilePath = Console.ReadLine();
-            string imageFilePath = "C:\\Jerry Shen\\eng3.jpg";
+            string imageFilePath = "C:\\Jerry Shen\\eng4.jpg";
             try
             {
 
@@ -209,14 +209,7 @@ namespace CSHttpClientSample
             return sb.ToString().Trim();
         }
 
-        RootObject OCRText;
-        public RootObject OCRTexts
-        {
-            get { return OCRText; }
-            // set { OCRTexts = value; OnPropertyChanged(); }
-        }
-
-        Region reion = null;
+        
 
 
 
