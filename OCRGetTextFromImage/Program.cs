@@ -36,7 +36,7 @@ namespace CSHttpClientSample
             Console.WriteLine("Optical Character Recognition:");
             // Console.Write("Enter the path to an image with text you wish to read: ");
             // string imageFilePath = Console.ReadLine();
-            string imageFilePath = "C:\\Jerry Shen\\images.jpg";
+            string imageFilePath = "C:\\Jerry Shen\\eng3.jpg";
             try
             {
 
@@ -60,62 +60,72 @@ namespace CSHttpClientSample
         /// <param name="imageFilePath">The image file.</param>
         static async void MakeOCRRequest(string imageFilePath)
         {
-            HttpClient client = new HttpClient();
 
-            // Request headers.
-            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request parameters.
-            string requestParameters = "language=unk&detectOrientation=true";
-
-            // Assemble the URI for the REST API Call.
-            string uri = uriBase + "?" + requestParameters;
-
-            HttpResponseMessage response;
-
-            // Request body. Posts a locally stored JPEG image.
-            byte[] byteData = GetImageAsByteArray(imageFilePath);
-
-            using (ByteArrayContent content = new ByteArrayContent(byteData))
+            try
             {
-                // This example uses content type "application/octet-stream".
-                // The other content types you can use are "application/json" and "multipart/form-data"//application/octet-stream
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                HttpClient client = new HttpClient();
 
-                // Execute the REST API call.
-                response = await client.PostAsync(uri, content);
+                // Request headers.
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
 
-                // Get the JSON response.
-                string contentString = await response.Content.ReadAsStringAsync();
+                // Request parameters.
+                string requestParameters = "language=unk&detectOrientation=true";
 
-                // Display the JSON response.
-                Console.WriteLine("\nResponse:\n");
-                //  Console.WriteLine(JsonPrettyPrint(contentString));
-                File.WriteAllText(@"C:\\Jerry Shen\\ocrtest.json", JsonPrettyPrint(contentString));
-                var obj = DeserializeObject<RootObject>(JsonPrettyPrint(contentString));
-                Console.WriteLine(obj.language);
-                Console.WriteLine(obj.textAngle);
-                Console.WriteLine(obj.orientation);           
+                // Assemble the URI for the REST API Call.
+                string uri = uriBase + "?" + requestParameters;
 
-                string final_test = "";
+                HttpResponseMessage response;
 
-                foreach (var region_objall in obj.regions)
+                // Request body. Posts a locally stored JPEG image.
+                byte[] byteData = GetImageAsByteArray(imageFilePath);
+
+                using (ByteArrayContent content = new ByteArrayContent(byteData))
                 {
-                    foreach (var lines_objall in region_objall.lines )
+                    // This example uses content type "application/octet-stream".
+                    // The other content types you can use are "application/json" and "multipart/form-data"//application/octet-stream
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+                    // Execute the REST API call.
+                    response = await client.PostAsync(uri, content);
+
+                    // Get the JSON response.
+                    string contentString = await response.Content.ReadAsStringAsync();
+
+                    // Display the JSON response.
+                    Console.WriteLine("\nResponse:\n");
+                    //  Console.WriteLine(JsonPrettyPrint(contentString));
+                    File.WriteAllText(@"C:\\Jerry Shen\\ocrtest.json", JsonPrettyPrint(contentString));
+                    var obj = DeserializeObject<RootObject>(JsonPrettyPrint(contentString));
+                    Console.WriteLine(obj.language);
+                    Console.WriteLine(obj.textAngle);
+                    Console.WriteLine(obj.orientation);
+
+                    string final_test = "";
+
+                    foreach (var region_objall in obj.regions)
                     {
-                        foreach(var words_objall in lines_objall.words)
+                        foreach (var lines_objall in region_objall.lines)
                         {
+                            foreach (var words_objall in lines_objall.words)
+                            {
 
-                            final_test += words_objall.text + " ";
+                                final_test += words_objall.text + " ";
+                            }
+
                         }
-
                     }
-                }              
-                Console.WriteLine(final_test);
+                    Console.WriteLine(final_test);
 
-                File.WriteAllText(@"C:\\Jerry Shen\\OCRText.txt", JsonPrettyPrint(final_test));
+                    File.WriteAllText(@"C:\\Jerry Shen\\OCRText.txt", JsonPrettyPrint(final_test));
+                }
+            }
+            catch (Exception ee)
+            {
+                Console.WriteLine("Error: " + ee.Message.ToString());
 
             }
+
+        
         }
 
 
